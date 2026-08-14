@@ -70,8 +70,17 @@ lazy val parserCombinators = crossProject(JVMPlatform, JSPlatform, NativePlatfor
     Compile / unmanagedSourceDirectories ++= {
       (Compile / unmanagedSourceDirectories).value.map { dir =>
         CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((3, _))  => file(dir.getPath ++ "-3+")
           case Some((2, 13)) => file(dir.getPath ++ "-2.13+")
-          case Some((3, _))  => file(dir.getPath ++ "-2.13+")
+          case _             => file(dir.getPath ++ "-2.13-")
+        }
+      }
+    },
+    Test / unmanagedSourceDirectories ++= {
+      (Test / unmanagedSourceDirectories).value.map { dir =>
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((2, 13)) => file(dir.getPath ++ "-2.13+")
+          case Some((3, _))  => file(dir.getPath ++ "-3+")
           case _             => file(dir.getPath ++ "-2.13-")
         }
       }
@@ -81,6 +90,8 @@ lazy val parserCombinators = crossProject(JVMPlatform, JSPlatform, NativePlatfor
       Seq(
         // scala/scala-parser-combinators#605
         ProblemFilters.exclude[IncompatibleSignatureProblem]("scala.util.parsing.input.PagedSeq.sliding"),
+        // scala/scala-parser-combinators#646
+        ProblemFilters.exclude[DirectMissingMethodProblem]("scala.util.parsing.combinator.Parsers#~.given_CanEqual_~_~")
       )
     },
   )
