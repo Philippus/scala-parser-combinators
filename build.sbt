@@ -91,7 +91,7 @@ lazy val parserCombinators = crossProject(JVMPlatform, JSPlatform, NativePlatfor
         // scala/scala-parser-combinators#605
         ProblemFilters.exclude[IncompatibleSignatureProblem]("scala.util.parsing.input.PagedSeq.sliding"),
         // scala/scala-parser-combinators#646
-        ProblemFilters.exclude[DirectMissingMethodProblem]("scala.util.parsing.combinator.Parsers#~.given_CanEqual_~_~")
+        ProblemFilters.exclude[DirectMissingMethodProblem]("scala.util.parsing.combinator.Parsers#~.given_CanEqual_~_~"),
         // -Yfuture-lazy-vals turns the module's <clinit> from public to private, which is not an
         // incompatibility. Drop once the fix for scala-garden/mima#794 is released.
         ProblemFilters.exclude[DirectMissingMethodProblem]("scala.util.parsing.input.OffsetPosition.<clinit>"),
