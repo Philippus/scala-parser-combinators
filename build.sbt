@@ -39,7 +39,7 @@ lazy val parserCombinators = crossProject(JVMPlatform, JSPlatform, NativePlatfor
         // not sure what resolving this would look like? didn't think about it too hard
         "-Wconf:site=scala.util.parsing.combinator.lexical.StdLexical.*&cat=other-match-analysis:i",
       )
-      case Some((3, _)) => Seq("Wunused:all")
+      case Some((3, _)) => Seq("-Wunused:all")
       case _ => Seq()
     }),
     Compile / doc / scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
@@ -92,10 +92,17 @@ lazy val parserCombinators = crossProject(JVMPlatform, JSPlatform, NativePlatfor
         ProblemFilters.exclude[IncompatibleSignatureProblem]("scala.util.parsing.input.PagedSeq.sliding"),
         // scala/scala-parser-combinators#646
         ProblemFilters.exclude[DirectMissingMethodProblem]("scala.util.parsing.combinator.Parsers#~.given_CanEqual_~_~")
+        // -Yfuture-lazy-vals turns the module's <clinit> from public to private, which is not an
+        // incompatibility. Drop once the fix for scala-garden/mima#794 is released.
+        ProblemFilters.exclude[DirectMissingMethodProblem]("scala.util.parsing.input.OffsetPosition.<clinit>"),
       )
     },
   )
   .jvmSettings(
+    Compile / compile / scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((3, _)) => Seq("-release:17", "-Yfuture-lazy-vals")
+      case _ => Seq("-target:jvm-1.8")
+    }),
     ScalaModulePlugin.scalaModuleOsgiSettings,
     OsgiKeys.exportPackage := Seq(s"scala.util.parsing.*;version=${version.value}"),
   )
