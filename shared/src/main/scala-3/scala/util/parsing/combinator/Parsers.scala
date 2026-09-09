@@ -119,7 +119,7 @@ trait Parsers {
     def get: T
 
     def getOrElse[B >: T](default: => B): B =
-      if (isEmpty) default else this.get
+        if (isEmpty) default else this.get
 
     val next: Input
 
@@ -170,7 +170,7 @@ trait Parsers {
     def mapPartial[U](f: PartialFunction[Nothing, U], error: Nothing => String): ParseResult[U] = this
 
     def flatMapWithNext[U](f: Nothing => Input => ParseResult[U]): ParseResult[U]
-    = this
+      = this
 
     def filterWithError(p: Nothing => Boolean, error: Nothing => String, position: Input): ParseResult[Nothing] = this
 
@@ -242,7 +242,7 @@ trait Parsers {
   }
 
   def Parser[T](f: Input => ParseResult[T]): Parser[T]
-  = new Parser[T]{ def apply(in: Input) = f(in) }
+    = new Parser[T]{ def apply(in: Input) = f(in) }
 
   private[combinator] def Success[U](res: U, next: Input, failure: Option[Failure]): ParseResult[U] =
     new Success(res, next) { override val lastFailure: Option[Failure] = failure }
@@ -258,7 +258,7 @@ trait Parsers {
     }
 
   def OnceParser[T](f: Input => ParseResult[T]): Parser[T] with OnceParser[T]
-  = new Parser[T] with OnceParser[T] { def apply(in: Input) = f(in) }
+    = new Parser[T] with OnceParser[T] { def apply(in: Input) = f(in) }
 
   /** The root class of parsers.
    *  Parsers are functions from the Input type to ParseResult.
@@ -272,16 +272,16 @@ trait Parsers {
     def apply(in: Input): ParseResult[T]
 
     def flatMap[U](f: T => Parser[U]): Parser[U]
-    = Parser{ in => this(in) flatMapWithNext(f)}
+      = Parser{ in => this(in) flatMapWithNext(f)}
 
     def map[U](f: T => U): Parser[U] //= flatMap{x => success(f(x))}
-    = Parser{ in => this(in) map(f)}
+      = Parser{ in => this(in) map(f)}
 
     def filter(p: T => Boolean): Parser[T]
-    = withFilter(p)
+      = withFilter(p)
 
     def withFilter(p: T => Boolean): Parser[T]
-    = Parser{ in => this(in).filterWithError(p, "Input doesn't match filter: "+_, in)}
+      = Parser{ in => this(in).filterWithError(p, "Input doesn't match filter: "+_, in)}
 
     // no filter yet, dealing with zero is tricky!
 
@@ -343,10 +343,10 @@ trait Parsers {
      */
     def - [U](q: Parser[U]): Parser[T] = (not(q) ~> this).named("-")
 
-    /* not really useful: V cannot be inferred because Parser is covariant in first type parameter (V is always trivially Nothing)
-   def ~~ [U, V](q: => Parser[U])(implicit combine: (T, U) => V): Parser[V] = new Parser[V] {
-     def apply(in: Input) = seq(Parser.this, q)((x, y) => combine(x,y))(in)
-   }  */
+     /* not really useful: V cannot be inferred because Parser is covariant in first type parameter (V is always trivially Nothing)
+    def ~~ [U, V](q: => Parser[U])(implicit combine: (T, U) => V): Parser[V] = new Parser[V] {
+      def apply(in: Input) = seq(Parser.this, q)((x, y) => combine(x,y))(in)
+    }  */
 
     /** A parser combinator for non-back-tracking sequential composition.
      *
@@ -359,7 +359,7 @@ trait Parsers {
      *         The resulting parser fails if either `p` or `q` fails, this failure is fatal.
      */
     def ~! [U](p: => Parser[U]): Parser[~[T, U]]
-    = OnceParser{ (for(a <- this; b <- commit(p)) yield new ~(a,b)).named("~!") }
+      = OnceParser{ (for(a <- this; b <- commit(p)) yield new ~(a,b)).named("~!") }
 
 
     /** A parser combinator for non-back-tracking sequential composition which only keeps the right result.
@@ -898,7 +898,7 @@ trait Parsers {
    *          combines two elements into one
    */
   def chainl1[T](p: => Parser[T], q: => Parser[(T, T) => T]): Parser[T]
-  = chainl1(p, p, q)
+    = chainl1(p, p, q)
 
   /** A parser generator that, roughly, generalises the `rep1sep` generator
    *  so that `q`, which parses the separator, produces a left-associative
@@ -911,9 +911,9 @@ trait Parsers {
    *          into one
    */
   def chainl1[T, U](first: => Parser[T], p: => Parser[U], q: => Parser[(T, U) => T]): Parser[T]
-  = first ~ rep(q ~ p) ^^ {
-    case x ~ xs => xs.foldLeft(x: T){case (a, f ~ b) => f(a, b)} // x's type annotation is needed to deal with changed type inference due to SI-5189
-  }
+    = first ~ rep(q ~ p) ^^ {
+        case x ~ xs => xs.foldLeft(x: T){case (a, f ~ b) => f(a, b)} // x's type annotation is needed to deal with changed type inference due to SI-5189
+      }
 
   /** A parser generator that generalises the `rep1sep` generator so that `q`,
    *  which parses the separator, produces a right-associative function that
@@ -929,9 +929,9 @@ trait Parsers {
    * @param first   the "first" (right-most) element to be combined
    */
   def chainr1[T, U](p: => Parser[T], q: => Parser[(T, U) => U], combine: (T, U) => U, first: U): Parser[U]
-  = p ~ rep(q ~ p) ^^ {
-    case x ~ xs => (new ~(combine, x) :: xs).foldRight(first){case (f ~ a, b) => f(a, b)}
-  }
+    = p ~ rep(q ~ p) ^^ {
+        case x ~ xs => (new ~(combine, x) :: xs).foldRight(first){case (f ~ a, b) => f(a, b)}
+      }
 
   /** A parser generator for optional sub-phrases.
    *
@@ -1025,16 +1025,20 @@ trait Parsers {
     override def toString = s"(${_1}~${_2})"
   }
 
+  object ~ {
+    given[A, B](using CanEqual[A, A], CanEqual[B, B]): CanEqual[~[A, B], ~[A, B]] = CanEqual.derived
+  }
+
   /** A parser whose `~` combinator disallows back-tracking.
    */
   trait OnceParser[+T] extends Parser[T] {
     override def ~ [U](p: => Parser[U]): Parser[~[T, U]]
-    = OnceParser{ (for(a <- this; b <- commit(p)) yield new ~(a,b)).named("~") }
+      = OnceParser{ (for(a <- this; b <- commit(p)) yield new ~(a,b)).named("~") }
 
     override def ~> [U](p: => Parser[U]): Parser[U]
-    = OnceParser{ (for(_ <- this; b <- commit(p)) yield b).named("~>") }
+      = OnceParser{ (for(_ <- this; b <- commit(p)) yield b).named("~>") }
 
     override def <~ [U](p: => Parser[U]): Parser[T]
-    = OnceParser{ (for(a <- this; _ <- commit(p)) yield a).named("<~") }
+      = OnceParser{ (for(a <- this; _ <- commit(p)) yield a).named("<~") }
   }
 }

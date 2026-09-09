@@ -67,24 +67,6 @@ lazy val parserCombinators = crossProject(JVMPlatform, JSPlatform, NativePlatfor
           version.value
         )
     }),
-    Compile / unmanagedSourceDirectories ++= {
-      (Compile / unmanagedSourceDirectories).value.map { dir =>
-        CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((3, _))  => file(dir.getPath ++ "-3+")
-          case Some((2, 13)) => file(dir.getPath ++ "-2.13+")
-          case _             => file(dir.getPath ++ "-2.13-")
-        }
-      }
-    },
-    Test / unmanagedSourceDirectories ++= {
-      (Test / unmanagedSourceDirectories).value.map { dir =>
-        CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((2, 13)) => file(dir.getPath ++ "-2.13+")
-          case Some((3, _))  => file(dir.getPath ++ "-3+")
-          case _             => file(dir.getPath ++ "-2.13-")
-        }
-      }
-    },
 
     mimaBinaryIssueFilters ++= {
       Seq(
