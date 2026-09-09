@@ -82,8 +82,8 @@ lazy val parserCombinators = crossProject(JVMPlatform, JSPlatform, NativePlatfor
   )
   .jvmSettings(
     Compile / compile / scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) => Seq("-release:17", "-Yfuture-lazy-vals")
-      case _ => Seq("-target:jvm-1.8")
+      case Some((3, _)) => Seq("-Yfuture-lazy-vals", "-java-output-version:17")
+      case _ => Seq()
     }),
     ScalaModulePlugin.scalaModuleOsgiSettings,
     OsgiKeys.exportPackage := Seq(s"scala.util.parsing.*;version=${version.value}"),
